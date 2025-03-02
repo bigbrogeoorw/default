@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hello</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p>If Roundcube is hosted in <strong>XAMPP</strong>, you can still integrate it with your mail server (Postfix and Dovecot) on Ubuntu. Below, I’ll guide you through the steps to configure Roundcube in XAMPP to work with your mail server.</p>
+<hr>
+<h3 id="step-1-install-roundcube-in-xampp">Step 1: Install Roundcube in XAMPP</h3>
+<ol>
+<li>
+<p><strong>Download Roundcube</strong>:</p>
+<ul>
+<li>Go to the <a href="https://roundcube.net/download">Roundcube website</a> and download the latest version.</li>
+<li>Extract the Roundcube files to the <code>htdocs</code> folder in your XAMPP installation directory (e.g., <code>C:\xampp\htdocs\roundcube</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Set Up the Database</strong>:</p>
+<ul>
+<li>Open <code>phpMyAdmin</code> (usually accessible via <code>http://localhost/phpmyadmin</code>).</li>
+<li>Create a new database for Roundcube (e.g., <code>roundcubemail</code>).</li>
+<li>Import the Roundcube database schema:
+<ul>
+<li>Go to the <code>SQL</code> tab in phpMyAdmin.</li>
+<li>Import the <code>SQL/mysql.initial.sql</code> file from the Roundcube installation directory.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure Roundcube</strong>:</p>
+<ul>
+<li>Open the Roundcube configuration file:
+<ul>
+<li>Navigate to <code>C:\xampp\htdocs\roundcube\config</code>.</li>
+<li>Rename <code>config.inc.php.sample</code> to <code>config.inc.php</code>.</li>
+</ul>
+</li>
+<li>Edit <code>config.inc.php</code> and configure the following:<pre class=" language-php"><code class="prism  language-php"><span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'db_dsnw'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'mysql://root:@localhost/roundcubemail'</span><span class="token punctuation">;</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'default_host'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'ssl://mail.example.com'</span><span class="token punctuation">;</span> <span class="token comment">// Replace with your mail server's hostname</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'default_port'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">993</span><span class="token punctuation">;</span> <span class="token comment">// IMAP port</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'smtp_server'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'tls://mail.example.com'</span><span class="token punctuation">;</span> <span class="token comment">// Replace with your mail server's hostname</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'smtp_port'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">587</span><span class="token punctuation">;</span> <span class="token comment">// SMTP port</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'smtp_user'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'%u'</span><span class="token punctuation">;</span> <span class="token comment">// Use the same username as the IMAP login</span>
+<span class="token variable">$config</span><span class="token punctuation">[</span><span class="token string">'smtp_pass'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'%p'</span><span class="token punctuation">;</span> <span class="token comment">// Use the same password as the IMAP login</span>
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="step-2-configure-your-mail-server-postfix-and-dovecot">Step 2: Configure Your Mail Server (Postfix and Dovecot)</h3>
+<p>Ensure your mail server is properly configured to allow connections from Roundcube. Refer to the earlier steps in the guide to set up Postfix and Dovecot.</p>
+<hr>
+<h3 id="step-3-allow-remote-connections-to-mysql-if-needed">Step 3: Allow Remote Connections to MySQL (if needed)</h3>
+<p>If your mail server and Roundcube are on different machines, you need to allow remote connections to the MySQL database.</p>
+<ol>
+<li>
+<p><strong>Edit MySQL Configuration</strong>:</p>
+<ul>
+<li>Open the MySQL configuration file:<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> <span class="token function">nano</span> /etc/mysql/mysql.conf.d/mysqld.cnf
+</code></pre>
+</li>
+<li>Find the <code>bind-address</code> line and change it to:<pre class=" language-ini"><code class="prism  language-ini"><span class="token constant">bind-address</span> <span class="token attr-value"><span class="token punctuation">=</span> 0.0.0.0</span>
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Grant Remote Access</strong>:</p>
+<ul>
+<li>Log in to MySQL:<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> mysql -u root -p
+</code></pre>
+</li>
+<li>Grant access to the Roundcube user:<pre class=" language-sql"><code class="prism  language-sql"><span class="token keyword">GRANT</span> <span class="token keyword">ALL</span> <span class="token keyword">PRIVILEGES</span> <span class="token keyword">ON</span> roundcubemail<span class="token punctuation">.</span><span class="token operator">*</span> <span class="token keyword">TO</span> <span class="token string">'roundcubeuser'</span>@'<span class="token operator">%</span><span class="token string">' IDENTIFIED BY '</span>password'<span class="token punctuation">;</span>
+FLUSH <span class="token keyword">PRIVILEGES</span><span class="token punctuation">;</span>
+<span class="token keyword">EXIT</span><span class="token punctuation">;</span>
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Restart MySQL</strong>:</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">sudo</span> systemctl restart mysql
+</code></pre>
+</li>
+</ol>
+<hr>
+<h3 id="step-4-test-roundcube">Step 4: Test Roundcube</h3>
+<ol>
+<li>Access Roundcube via your browser:
+<ul>
+<li>Open <code>http://localhost/roundcube</code> (or the appropriate URL if hosted elsewhere).</li>
+</ul>
+</li>
+<li>Log in using an email account created in your mail server (e.g., <code>user@example.com</code>).</li>
+<li>Send and receive emails to test the setup.</li>
+</ol>
+<hr>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<ul>
+<li><strong>Connection Issues</strong>:
+<ul>
+<li>Ensure your mail server’s firewall allows connections on ports <code>993</code> (IMAP) and <code>587</code> (SMTP).</li>
+<li>Check the Roundcube error log (located in <code>logs/</code> inside the Roundcube directory) for any issues.</li>
+</ul>
+</li>
+<li><strong>Database Issues</strong>:
+<ul>
+<li>Verify the database credentials in <code>config.inc.php</code>.</li>
+<li>Ensure the Roundcube database schema is properly imported.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>Let me know if you encounter any issues or need further assistance!</p>
+</div>
+</body>
+
+</html>
